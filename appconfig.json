@@ -1,7 +1,7 @@
 {
-	"name": "Helwyr Hunter Pro",
-	"id": "helwyr_zayas_01",
-	"description": "Mouse-over defense alerts for Helwyr.",
+	"name": "Helwyr Hunter",
+	"id": "helwyr_hunter_zayas",
+	"description": "Defense alerts for Helwyr.",
 	"permissions": [
 		"overlay",
 		"screen",
