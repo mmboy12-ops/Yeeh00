@@ -1,0 +1,12 @@
+{
+	"name": "Helwyr Defense Pro",
+	"id": "helwyr_pro_zayas",
+	"description": "Announces Helwyr attacks and suggests defensives at your cursor.",
+	"permissions": [
+		"overlay",
+		"screen",
+		"gamestate"
+	],
+	"main": "index.html",
+	"icon": "icon.png"
+}

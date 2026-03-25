@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Helwyr Pro</title>
+    <script src="https://runeapps.org/alt1lib.js"></script>
+    <style>
+        body { color: white; font-family: sans-serif; background: rgba(0,0,0,0.7); padding: 10px; }
+        .status { font-weight: bold; color: #00ff00; }
+    </style>
+</head>
+<body>
+    <h3>Helwyr Helper</h3>
+    <div id="status">Waiting for fight...</div>
+    <hr>
+    <p>Next: <span id="next-attack" class="status">Unknown</span></p>
+    <p>Defense: <span id="defense" style="color: cyan;">---</span></p>
+
+    <script>
+        // Define the Helwyr Rotation
+        const rotation = [
+            { name: "Cyrets", trigger: "Cyrets", next: "Cleave", advice: "Resonance / Shield Flick" },
+            { name: "Cleave", trigger: "You will bleed", next: "Frenzy", advice: "Devotion / Freedom / Debilitate" },
+            { name: "Frenzy", trigger: "Frenzy", next: "Thrash", advice: "Soul Split / Prayer Flick" },
+            { name: "Thrash", trigger: "Thrash", next: "Howl", advice: "Move Away / Prepare" },
+            { name: "Howl", trigger: "Howl", next: "Cyrets", advice: "Anticipation" }
+        ];
+
+        let currentIndex = 0;
+
+        function updateOverlay(attackName, advice) {
+            document.getElementById("next-attack").innerText = attackName;
+            document.getElementById("defense").innerText = advice;
+
+            // Draw to the game screen near the mouse
+            if (window.alt1 && alt1.permissionOverlay) {
+                const mouse = alt1.mousePosition;
+                if (mouse) {
+                    alt1.overLaySetGroup("helwyr_hints");
+                    alt1.overLayTextEx(
+                        `NEXT: ${attackName}\nUSE: ${advice}`,
+                        255, 255, 0, // Yellow text
+                        mouse.x + 20, mouse.y + 20,
+                        14, "sans-serif", true, 2000
+                    );
+                }
+            }
+        }
+
+        // Simulating a Chat/Animation listener
+        // In a full build, you'd use alt1.chatbox.read() here
+        setInterval(() => {
+            // For logic: check screen for triggers
+            // If trigger found, move to next rotation step
+            // This is where you'd plug in your OCR logic
+        }, 600);
+    </script>
+</body>
+</html>
