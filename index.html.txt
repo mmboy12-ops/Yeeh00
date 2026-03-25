@@ -1,58 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Helwyr Pro</title>
+    <meta charset="UTF-8">
+    <title>Helwyr Defense Pro</title>
     <script src="https://runeapps.org/alt1lib.js"></script>
     <style>
-        body { color: white; font-family: sans-serif; background: rgba(0,0,0,0.7); padding: 10px; }
-        .status { font-weight: bold; color: #00ff00; }
+        body { 
+            background: rgba(30, 30, 30, 0.9); 
+            color: #e0e0e0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 15px;
+            border-top: 3px solid #f1c40f;
+        }
+        h2 { color: #f1c40f; margin-top: 0; font-size: 1.2em; }
+        .data-row { margin-bottom: 10px; font-size: 0.9em; }
+        .label { color: #888; display: block; }
+        .value { font-weight: bold; font-size: 1.1em; color: #fff; }
+        #status { font-size: 0.8em; color: #55ff55; }
     </style>
 </head>
 <body>
-    <h3>Helwyr Helper</h3>
-    <div id="status">Waiting for fight...</div>
-    <hr>
-    <p>Next: <span id="next-attack" class="status">Unknown</span></p>
-    <p>Defense: <span id="defense" style="color: cyan;">---</span></p>
+    <h2>Helwyr Helper</h2>
+    <div class="data-row">
+        <span class="label">NEXT ATTACK</span>
+        <span id="next-attack" class="value">Waiting for start...</span>
+    </div>
+    <div class="data-row">
+        <span class="label">RECOMMENDED DEFENSE</span>
+        <span id="defense" class="value" style="color: #00d4ff;">---</span>
+    </div>
+    <div id="status">Scanning Chatbox...</div>
 
     <script>
-        // Define the Helwyr Rotation
+        // Configuration: Define the Boss Rotation
         const rotation = [
-            { name: "Cyrets", trigger: "Cyrets", next: "Cleave", advice: "Resonance / Shield Flick" },
-            { name: "Cleave", trigger: "You will bleed", next: "Frenzy", advice: "Devotion / Freedom / Debilitate" },
-            { name: "Frenzy", trigger: "Frenzy", next: "Thrash", advice: "Soul Split / Prayer Flick" },
-            { name: "Thrash", trigger: "Thrash", next: "Howl", advice: "Move Away / Prepare" },
-            { name: "Howl", trigger: "Howl", next: "Cyrets", advice: "Anticipation" }
+            { trigger: "you will bleed", name: "Frenzy", advice: "Freedom + Devotion" },
+            { trigger: "frenzy", name: "Thrash", advice: "Resonance / Soul Split" },
+            { trigger: "thrash", name: "Howl", advice: "Prepare to Move" },
+            { trigger: "howl", name: "Cyrets", advice: "Anticipation / Cleave soon" },
+            { trigger: "cyrets", name: "Cleave", advice: "Resonance / Shield Flick" }
         ];
 
-        let currentIndex = 0;
+        // Initialize Alt1 Chat Reader
+        // We use the global 'alt1' object provided by the toolkit
+        let reader = new ChatboxReader();
+        reader.readargs.colors = [
+            A1lib.mixColor(255, 0, 0),   // Red (Boss shouts)
+            A1lib.mixColor(255, 255, 255) // White
+        ];
 
-        function updateOverlay(attackName, advice) {
-            document.getElementById("next-attack").innerText = attackName;
-            document.getElementById("defense").innerText = advice;
+        function mainLoop() {
+            if (!window.alt1) return;
 
-            // Draw to the game screen near the mouse
-            if (window.alt1 && alt1.permissionOverlay) {
-                const mouse = alt1.mousePosition;
-                if (mouse) {
-                    alt1.overLaySetGroup("helwyr_hints");
-                    alt1.overLayTextEx(
-                        `NEXT: ${attackName}\nUSE: ${advice}`,
-                        255, 255, 0, // Yellow text
-                        mouse.x + 20, mouse.y + 20,
-                        14, "sans-serif", true, 2000
-                    );
+            // Find chatbox if not found
+            if (!reader.pos) {
+                reader.find();
+            }
+
+            let lines = reader.read();
+            if (lines && lines.length > 0) {
+                let latest = lines[lines.length - 1].text.toLowerCase();
+                
+                // Match chat line to rotation trigger
+                for (let step of rotation) {
+                    if (latest.includes(step.trigger)) {
+                        updateUI(step.name, step.advice);
+                        break;
+                    }
                 }
             }
         }
 
-        // Simulating a Chat/Animation listener
-        // In a full build, you'd use alt1.chatbox.read() here
-        setInterval(() => {
-            // For logic: check screen for triggers
-            // If trigger found, move to next rotation step
-            // This is where you'd plug in your OCR logic
-        }, 600);
+        function updateUI(attack, advice) {
+            document.getElementById("next-attack").innerText = attack;
+            document.getElementById("defense").innerText = advice;
+
+            // Draw the Tooltip near the mouse cursor
+            const mouse = alt1.mousePosition;
+            if (mouse) {
+                alt1.overLaySetGroup("helwyr_tooltip");
+                alt1.overLayTextEx(
+                    `⚠️ NEXT: ${attack.toUpperCase()}\n🛡️ ${advice}`,
+                    241, 196, 15, // Yellow/Gold
+                    mouse.x + 25, mouse.y + 25,
+                    16, "sans-serif", true, 2500
+                );
+            }
+        }
+
+        // Run the loop every 300ms (roughly half a game tick)
+        setInterval(mainLoop, 300);
     </script>
 </body>
 </html>
