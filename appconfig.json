@@ -1,7 +1,7 @@
 {
 	"name": "Helwyr Hunter Pro",
-	"id": "helwyr_pro_zayas_v2",
-	"description": "Yellow-text detection and mouse-over defense alerts for Helwyr.",
+	"id": "helwyr_pro_zayas_v3",
+	"description": "Yellow-text detection for Helwyr mechanics.",
 	"version": "1.0.0",
 	"permissions": [
 		"overlay",
