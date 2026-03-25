@@ -2,29 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Helwyr Defense Pro</title>
+    <title>Helwyr Hunter Pro</title>
     <script src="https://runeapps.org/alt1lib.js"></script>
     <style>
         body { 
-            background: rgba(20, 20, 20, 0.95); 
+            background: rgba(18, 18, 18, 0.98); 
             color: #f1c40f; 
             font-family: 'Segoe UI', sans-serif; 
-            padding: 20px; text-align: center;
-            border-top: 4px solid #f1c40f;
+            padding: 15px; text-align: center;
+            border-top: 5px solid #f1c40f;
+            overflow: hidden;
         }
-        .box { background: #2c3e50; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #f39c12; }
-        .label { color: #95a5a6; font-size: 0.8em; text-transform: uppercase; }
-        .value { display: block; font-size: 1.3em; font-weight: bold; color: #fff; }
-        #status { font-size: 0.7em; color: #27ae60; margin-top: 15px; }
+        .box { background: #2c3e50; padding: 12px; border-radius: 8px; margin: 8px 0; border: 1px solid #d35400; }
+        .label { color: #95a5a6; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; }
+        .value { display: block; font-size: 1.2em; font-weight: bold; color: #fff; margin-top: 4px; }
+        .btn { 
+            background: #e67e22; border: none; color: white; padding: 10px; 
+            width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;
+            margin-top: 10px; transition: 0.2s;
+        }
+        .btn:hover { background: #d35400; }
+        #status { font-size: 0.7em; color: #27ae60; margin-top: 10px; opacity: 0.8; }
     </style>
 </head>
 <body>
 
-    <div style="font-size: 1.5em; font-weight: bold;">Helwyr Helper</div>
+    <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">HELWYR HUNTER</div>
     
     <div class="box">
         <span class="label">Incoming Attack</span>
-        <span id="next-attack" class="value">Ready for Fight</span>
+        <span id="next-attack" class="value">Awaiting Start...</span>
     </div>
 
     <div class="box">
@@ -32,10 +39,10 @@
         <span id="defense" class="value" style="color: #3498db;">---</span>
     </div>
 
+    <button class="btn" onclick="manualAdvance()">Manual Trigger (Alt+1)</button>
     <div id="status">Scanning for YELLOW overhead text...</div>
 
     <script>
-        // Standard Helwyr Rotation
         const helwyrRotation = [
             { name: "Cleave", advice: "Resonance / Shield Flick" },
             { name: "Frenzy", advice: "Devotion / Freedom" },
@@ -48,51 +55,51 @@
         let lastTrigger = 0;
 
         function mainLoop() {
-            if (!window.alt1) return;
+            if (!window.alt1 || !alt1.permissionScreen) return;
 
-            // Capture the whole RS client area
+            // Capture the RS client
             let img = alt1.capture(alt1.rsX, alt1.rsY, alt1.rsWidth, alt1.rsHeight);
             if (!img) return;
 
             let yellowPixels = 0;
-            
-            // Scan for Yellow (High Red, High Green, Low Blue)
+            // Standard Yellow/Gold Font Detection (R+G high, B low)
             for (let i = 0; i < img.data.length; i += 4) {
-                let r = img.data[i];
-                let g = img.data[i+1];
-                let b = img.data[i+2];
-
-                // Yellow is roughly R > 200, G > 180, B < 100
-                if (r > 200 && g > 180 && b < 100) {
+                if (img.data[i] > 210 && img.data[i+1] > 190 && img.data[i+2] < 110) {
                     yellowPixels++;
                 }
             }
 
-            // If a cluster of yellow text is detected
-            if (yellowPixels > 40 && (Date.now() - lastTrigger > 2500)) {
-                lastTrigger = Date.now();
-                currentIndex = (currentIndex + 1) % helwyrRotation.length;
-                updateApp(helwyrRotation[currentIndex]);
+            // Trigger if 40+ yellow pixels found (overhead text cluster)
+            if (yellowPixels > 40 && (Date.now() - lastTrigger > 3000)) {
+                manualAdvance();
             }
         }
 
-        function updateApp(step) {
+        function manualAdvance() {
+            lastTrigger = Date.now();
+            let step = helwyrRotation[currentIndex];
+            
             document.getElementById("next-attack").innerText = step.name;
             document.getElementById("defense").innerText = step.advice;
 
-            // Show Mouse Tooltip
-            const mouse = alt1.mousePosition;
-            if (mouse) {
-                alt1.overLaySetGroup("helwyr_tooltip");
-                alt1.overLayTextEx(
-                    `⚠️ ${step.name}\n🛡️ ${step.advice}`,
-                    255, 215, 0, // Yellow Overlay
-                    mouse.x + 25, mouse.y + 25,
-                    18, "sans-serif", true, 3000
-                );
+            // Mouse Overlay Logic
+            if (window.alt1 && alt1.permissionOverlay) {
+                const mouse = alt1.mousePosition;
+                if (mouse) {
+                    alt1.overLaySetGroup("helwyr_tooltip");
+                    alt1.overLayTextEx(
+                        `⚠️ ${step.name}\n🛡️ ${step.advice}`,
+                        255, 215, 0, // Yellow
+                        mouse.x + 25, mouse.y + 25,
+                        18, "sans-serif", true, 3500
+                    );
+                }
             }
+            
+            currentIndex = (currentIndex + 1) % helwyrRotation.length;
         }
 
+        // Run detection loop
         setInterval(mainLoop, 400);
     </script>
 </body>
