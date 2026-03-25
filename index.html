@@ -2,94 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helwyr Defense Pro</title>
     <script src="https://runeapps.org/alt1lib.js"></script>
     <style>
         body { 
-            background: rgba(30, 30, 30, 0.9); 
-            color: #e0e0e0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; padding: 15px;
-            border-top: 3px solid #f1c40f;
+            background: rgba(25, 25, 25, 0.95); 
+            color: #ecf0f1; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; padding: 20px;
+            border-top: 4px solid #e74c3c;
+            text-align: center;
         }
-        h2 { color: #f1c40f; margin-top: 0; font-size: 1.2em; }
-        .data-row { margin-bottom: 10px; font-size: 0.9em; }
-        .label { color: #888; display: block; }
-        .value { font-weight: bold; font-size: 1.1em; color: #fff; }
-        #status { font-size: 0.8em; color: #55ff55; }
+        .header { color: #e74c3c; font-size: 1.4em; font-weight: bold; margin-bottom: 15px; }
+        .box { background: #34495e; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .label { color: #bdc3c7; font-size: 0.8em; text-transform: uppercase; }
+        .value { display: block; font-size: 1.2em; font-weight: bold; margin-top: 5px; }
+        #status { font-size: 0.75em; color: #2ecc71; margin-top: 10px; }
+        button { background: #e74c3c; border: none; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #c0392b; }
     </style>
 </head>
 <body>
-    <h2>Helwyr Helper</h2>
-    <div class="data-row">
-        <span class="label">NEXT ATTACK</span>
-        <span id="next-attack" class="value">Waiting for start...</span>
+
+    <div class="header">Helwyr Helper</div>
+
+    <div class="box">
+        <span class="label">Next Mechanic</span>
+        <span id="next-attack" class="value">Searching...</span>
     </div>
-    <div class="data-row">
-        <span class="label">RECOMMENDED DEFENSE</span>
-        <span id="defense" class="value" style="color: #00d4ff;">---</span>
+
+    <div class="box">
+        <span class="label">Defense Suggestion</span>
+        <span id="defense" class="value" style="color: #3498db;">Standing by</span>
     </div>
-    <div id="status">Scanning Chatbox...</div>
+
+    <button onclick="testAlert()">Test Overlay</button>
+    <div id="status">Scanning screen for red text...</div>
 
     <script>
-        // Configuration: Define the Boss Rotation
-        const rotation = [
-            { trigger: "you will bleed", name: "Frenzy", advice: "Freedom + Devotion" },
-            { trigger: "frenzy", name: "Thrash", advice: "Resonance / Soul Split" },
-            { trigger: "thrash", name: "Howl", advice: "Prepare to Move" },
-            { trigger: "howl", name: "Cyrets", advice: "Anticipation / Cleave soon" },
-            { trigger: "cyrets", name: "Cleave", advice: "Resonance / Shield Flick" }
-        ];
-
-        // Initialize Alt1 Chat Reader
-        // We use the global 'alt1' object provided by the toolkit
-        let reader = new ChatboxReader();
-        reader.readargs.colors = [
-            A1lib.mixColor(255, 0, 0),   // Red (Boss shouts)
-            A1lib.mixColor(255, 255, 255) // White
-        ];
-
-        function mainLoop() {
-            if (!window.alt1) return;
-
-            // Find chatbox if not found
-            if (!reader.pos) {
-                reader.find();
-            }
-
-            let lines = reader.read();
-            if (lines && lines.length > 0) {
-                let latest = lines[lines.length - 1].text.toLowerCase();
-                
-                // Match chat line to rotation trigger
-                for (let step of rotation) {
-                    if (latest.includes(step.trigger)) {
-                        updateUI(step.name, step.advice);
-                        break;
-                    }
-                }
-            }
-        }
-
-        function updateUI(attack, advice) {
-            document.getElementById("next-attack").innerText = attack;
-            document.getElementById("defense").innerText = advice;
-
-            // Draw the Tooltip near the mouse cursor
-            const mouse = alt1.mousePosition;
-            if (mouse) {
-                alt1.overLaySetGroup("helwyr_tooltip");
-                alt1.overLayTextEx(
-                    `⚠️ NEXT: ${attack.toUpperCase()}\n🛡️ ${advice}`,
-                    241, 196, 15, // Yellow/Gold
-                    mouse.x + 25, mouse.y + 25,
-                    16, "sans-serif", true, 2500
-                );
-            }
-        }
-
-        // Run the loop every 300ms (roughly half a game tick)
-        setInterval(mainLoop, 300);
-    </script>
-</body>
-</html>
+        // Rotation sequence: Trigger
